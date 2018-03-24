@@ -7,50 +7,42 @@ players_filename = 'files/players.json'
 player_status_filename = 'files/player_status.json'
 round_ended = False
 
+players = list()
+
 
 @app.route('/', methods=['GET', 'POST'])
 def hello_world():
     return 'Welcome!'
 
 
-
 @app.route('/new_player', methods=['GET', 'POST'])
 def new_player():
     form = request.form
-    player = dict()
-    player['user_name'] = form['user']
-    player['player_ip'] = request.remote_addr
-
-    with open(players_filename, 'a') as players_file:
-        players_file.write(json.dumps(player))
-        players_file.write('\n')
+    _new_player = dict()
+    _new_player['lives'] = 3
+    _new_player['class'] = ''
+    _new_player['user'] = form['user']
+    global players
+    players.append(_new_player)
     return '200'
 
 
 @app.route('/clean_players', methods=['DELETE'])
 def clean_players():
-    round_ended = True
-    if os.path.isfile(players_filename):
-        os.remove(players_filename)
+    global players
+    players = list()
     return '200'
 
 
 @app.route('/get_players', methods=['GET'])
 def get_players():
-    if not os.path.isfile(players_filename):
-        return json.dumps([])
-    else:
-        players = []
-        with open(players_filename, 'r') as players_file:
-            for line in players_file.readlines():
-                players.append(json.loads(line))
+    return json.dumps(players)
 
-        return json.dumps(players)
 
-@app.route('/update_players', methods=['UPDATE'])
+@app.route('/update_players', methods=['PUT'])
 def update_players():
-    if not os.path.isfile('files/updated_players.json'):
-        x = 1
+    global players
+    players = json.loads(request.form['players'])
 
 
 
