@@ -7,9 +7,6 @@ players_filename = 'files/players.json'
 player_status_filename = 'files/player_status.json'
 round_ended = False
 
-players = list()
-
-
 @app.route('/', methods=['GET', 'POST'])
 def hello_world():
     return 'Welcome!'
