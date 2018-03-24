@@ -19,7 +19,7 @@ def hello_world():
 def new_player():
     form = request.form
     _new_player = dict()
-    _new_player['lives'] = 3
+    _new_player['lives'] = -1
     _new_player['class'] = ''
     _new_player['user'] = form['user']
     global players
@@ -39,7 +39,7 @@ def get_players():
     return json.dumps(players)
 
 
-@app.route('/update_players', methods=['PUT'])
+@app.route('/update_players', methods=['POST'])
 def update_players():
     global players
     players = json.loads(request.form['players'])
