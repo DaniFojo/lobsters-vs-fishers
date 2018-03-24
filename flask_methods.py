@@ -39,7 +39,7 @@ def get_players():
     return json.dumps(players)
 
 
-@app.route('/update_players', methods=['POST'])
+@app.route('/update_players', methods=['PUT'])
 def update_players():
     global players
     players = json.loads(request.form['players'])
