@@ -49,7 +49,8 @@ def get_players():
 
 @app.route('/update_players', methods=['UPDATE'])
 def update_players():
-    if not os.path.isfile():
+    if not os.path.isfile('files/updated_players.json'):
+        x = 1
 
 
 
