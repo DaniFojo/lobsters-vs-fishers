@@ -1,2 +1,5 @@
 flask
 requests
+PyAudio
+speech_recognition
+google-api-python-client
