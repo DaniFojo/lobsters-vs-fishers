@@ -8,6 +8,17 @@ players_filename = 'files/players.json'
 player_status_filename = 'files/player_status.json'
 round_ended = False
 
+
+# Constants
+NO = 'no'
+YES = 'yes'
+
+# Global variables
+players = list()
+chosen_user = ''
+pause = NO
+
+
 @app.route('/', methods=['GET', 'POST'])
 def hello_world():
     return 'Welcome!'
@@ -18,6 +29,8 @@ def new_player():
     _new_player = dict()
     _new_player['lives'] = -1
     _new_player['class'] = ''
+    _new_player['can_choose'] = NO
+    _new_player['to_update'] = NO
     _new_player['user'] = request.form['user']
     global players
     players.append(_new_player)
@@ -43,13 +56,52 @@ def update_players():
     return '200'
 
 
-@app.route('/increase_life_to_player', methods=['PUT'])
-def increase_life_to_player():
-    global players
+@app.route('/to_update', methods=['POST'])
+def to_update():
+    return str([p for p in players if p['user'] == request.form['user']][0]['to_update'])
+
+
+@app.route('/update_in_client', methods=['POST'])
+def update_in_client():
     user = request.form['user']
+    to_return = ''
+    global players
     for i in range(len(players)):
         if players[i]['user'] == user:
-            players[i]['lives'] += 1
+            players[i]['to_update'] = NO
+            to_return = json.dumps(players[i])
+    return to_return
+
+
+@app.route('/my_choice_is', methods=['POST'])
+def my_choice_is():
+    user = request.form['user']
+    global players
+    for i in range(len(players)):
+        if players[i]['user'] == user:
+            players[i]['can_choose'] = NO
+            global chosen_user
+            chosen_user = request.form['choice']
+    return '200'
+
+
+@app.route('/has_been_chosen', methods=['GET'])
+def has_been_chosen():
+    to_return = chosen_user
+    global chosen_user
+    chosen_user = ''
+    return to_return
+
+
+@app.route('/is_paused', methods=['GET'])
+def is_paused():
+    return pause
+
+
+@app.route('/toggle_pause', methods=['PUSH'])
+def toggle_pause():
+    global pause
+    pause = NO if pause == YES else YES
     return '200'
 
 
