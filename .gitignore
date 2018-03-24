@@ -102,3 +102,7 @@ ENV/
 
 # pycharm
 .idea
+
+# google api credentials
+credentials.json
+

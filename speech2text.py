@@ -13,7 +13,7 @@ def get_transcript_from_microphone(max_time=5, service='google_cloud'):
     :param service:
     :return:
     """
-    recognizer = sr.Recognizer
+    recognizer = sr.Recognizer()
     if service == 'google_cloud':
         while True:
             with sr.Microphone() as source:
@@ -54,10 +54,10 @@ def start_game(transcript):
     :param transcript:
     :return:
     """
-    keywords = {'start', 'begin', 'commence', 'go'}
+    transcript = transcript
+    print(transcript)
+    keywords = {'start', 'begin', 'commence', 'go', 'start.', 'begin.', 'commence.', 'go.', 'yes', 'yes.'}
     for word in transcript.split():
-        if word in keywords:
+        if word.lower() in keywords:
             return True
-        else:
-            return False
-
+    return False
