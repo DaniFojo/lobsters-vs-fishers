@@ -39,7 +39,7 @@ def get_players():
         with open(players_filename, 'r') as players_file:
             for line in players_file.readlines():
                 players.append(json.loads(line))
-        a = json.dumps(players)
+
         return json.dumps(players)
 
 
