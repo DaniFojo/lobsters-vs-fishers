@@ -4,6 +4,8 @@ from flask import Flask, session, redirect, url_for, escape, request
 app = Flask(__name__)
 
 players_filename = 'files/players.json'
+player_status_filename = 'files/player_status.json'
+round_ended = False
 
 
 @app.route('/', methods=['GET', 'POST'])
@@ -25,8 +27,9 @@ def new_player():
     return '200'
 
 
-@app.route('/clean_players', methods=['GET', 'POST'])
+@app.route('/clean_players', methods=['DELETE'])
 def clean_players():
+    round_ended = True
     if os.path.isfile(players_filename):
         os.remove(players_filename)
     return '200'
@@ -41,8 +44,14 @@ def get_players():
         with open(players_filename, 'r') as players_file:
             for line in players_file.readlines():
                 players.append(json.loads(line))
-        a = json.dumps(players)
+
         return json.dumps(players)
+
+@app.route('/update_players', methods=['UPDATE'])
+def update_players():
+    if not os.path.isfile('files/updated_players.json'):
+        x = 1
+
 
 
 if __name__ == '__main__':
