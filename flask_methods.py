@@ -43,7 +43,7 @@ def get_players():
 def update_players():
     global players
     players = json.loads(request.form['players'])
-
+    return '200'
 
 
 if __name__ == '__main__':
