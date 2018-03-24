@@ -15,11 +15,10 @@ def hello_world():
 
 @app.route('/new_player', methods=['GET', 'POST'])
 def new_player():
-    form = request.form
     _new_player = dict()
     _new_player['lives'] = -1
     _new_player['class'] = ''
-    _new_player['user'] = form['user']
+    _new_player['user'] = request.form['user']
     global players
     players.append(_new_player)
     return '200'
@@ -41,6 +40,16 @@ def get_players():
 def update_players():
     global players
     players = json.loads(request.form['players'])
+    return '200'
+
+
+@app.route('/increase_life_to_player', methods=['PUT'])
+def increase_life_to_player():
+    global players
+    user = request.form['user']
+    for i in range(len(players)):
+        if players[i]['user'] == user:
+            players[i]['lives'] += 1
     return '200'
 
 
