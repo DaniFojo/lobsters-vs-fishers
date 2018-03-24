@@ -19,7 +19,7 @@ def hello_world():
 def new_player():
     form = request.form
     _new_player = dict()
-    _new_player['lives'] = 3
+    _new_player['lives'] = -1
     _new_player['class'] = ''
     _new_player['user'] = form['user']
     global players
@@ -43,7 +43,7 @@ def get_players():
 def update_players():
     global players
     players = json.loads(request.form['players'])
-
+    return '200'
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)
