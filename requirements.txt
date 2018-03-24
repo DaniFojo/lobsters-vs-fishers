@@ -1,1 +1,3 @@
 flask
+PyAudio
+speech_recognition
