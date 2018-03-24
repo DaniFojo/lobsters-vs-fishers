@@ -11,12 +11,14 @@ def hello_world():
     return 'Welcome!'
 
 
+
 @app.route('/new_player', methods=['GET', 'POST'])
 def new_player():
     form = request.form
     player = dict()
     player['user_name'] = form['user']
     player['player_ip'] = request.remote_addr
+
     with open(players_filename, 'a') as players_file:
         players_file.write(json.dumps(player))
         players_file.write('\n')
