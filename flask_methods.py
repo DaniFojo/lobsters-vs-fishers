@@ -1,5 +1,6 @@
 import json
 import os
+import random
 from flask import Flask, session, redirect, url_for, escape, request
 app = Flask(__name__)
 
@@ -41,6 +42,7 @@ def update_players():
     global players
     players = json.loads(request.form['players'])
     return '200'
+
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)
