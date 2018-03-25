@@ -39,14 +39,18 @@ INITIAL_LIVES = 3
 
 def check_if_dead(players, user):
     for p in players:
-        if p['user'] == user:
-            p['lives'] = 0
-            p['is_alive'] = 'no'
+        if p['user'] == user and p['is_alive'] == 'yes':
+            if p['lives'] <= 0:
+                p['lives'] = 0
+                p['is_alive'] = 'no'
+                read('Player {} died!'.format(user))
     update_players(players)
 
 
 def subtract_one_life(players, n):
     players[n]['lives'] -= 1
+    read('Player number {} loses one life'.format(n+1))
+    check_if_dead(players, players[n]['user'])
     update_players(players)
 
 
@@ -72,12 +76,12 @@ def event_two_lives_lost(players):
         if players[doomed_index]['is_alive'] == 'yes':
             break
     players[doomed_index]['lives'] = max(0, players[doomed_index]['lives']-2)
-    for p in players:
-        p['to_update'] = 'yes'
-    update_players(players)
     read('Player {} has now {} lives.'.format(players[doomed_index]['user'],
                                               players[doomed_index]['lives']))
     check_if_dead(players, players[doomed_index]['user'])
+    for p in players:
+        p['to_update'] = 'yes'
+    update_players(players)
 
 
 def event_choose_with_whom_to_switch_classes(players):
@@ -124,6 +128,7 @@ def event_choose_who_to_attack(players):
         if players[i]['user'] == the_chosen:
             players[i]['lives'] -= 1
             read('Player {} has now {} lives.'.format(the_chosen, players[i]['lives']))
+            check_if_dead(players, the_chosen)
     update_players(players)
 
 
@@ -340,9 +345,7 @@ while not game_finished(players):
         if not confirmed:
             read('Ok, cancelling...'.format(target+1))
     subtract_one_life(players, target)
-    read('Player number {} loses one life.'.format(target+1))
     if players[target]['lives'] == 0:
-        read('Player number {} died!'.format(target+1))
         read('Player number {} was a...'.format(target+1))
         time.sleep(2)
         read(players[target]['class'])
