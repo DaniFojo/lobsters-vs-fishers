@@ -329,7 +329,9 @@ while not game_finished(players):
         }
         for i, p in enumerate(players):
             if p['lives'] > 0:
-                cprint(('{}: {}'.format(i + 1, p['user'])), color=colors[i])
+                cprint(('{}: {}. {} lives left.'.format(i + 1, p['user'], p['lives'])), color=colors[i])
+            else:
+                cprint(('{}: {}. DEAD'.format(i + 1, p['user'])), color=colors[i])
         transcript = speech2text.get_transcript_from_microphone()
         if not transcript:
             continue
