@@ -36,6 +36,8 @@ def event_increase_all_lives(players):
             p['to_update'] = 'yes'
     update_players(players)
 
+def event_player_steal_life(players):
+
 
 def event_choose_with_whom_to_switch_classes(players):
     who_chooses = random.choice(players)['user']
@@ -75,6 +77,7 @@ def event_choose_who_to_attack(players):
 
 
 EVENTS = [{'method': event_increase_all_lives, 'message': "It's raining. Everybody +1 live!"}]
+
 
 
 def clear():
@@ -173,7 +176,7 @@ while not game_finished(players):
     print('You can now discuss for {} seconds'.format(DISCUSS_TIME))
     wait_bar(DISCUSS_TIME)
     clear()
-    current_event = random.choice()
+    current_event = random.choice(EVENTS)
     print(current_event['message'])
     current_event['method'](players)
     time.sleep(2)

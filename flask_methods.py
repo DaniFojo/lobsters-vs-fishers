@@ -1,11 +1,13 @@
 import json
 import os
+import random
 from flask import Flask, session, redirect, url_for, escape, request
 app = Flask(__name__)
 
 players_filename = 'files/players.json'
 player_status_filename = 'files/player_status.json'
 round_ended = False
+
 
 # Constants
 NO = 'no'
@@ -105,6 +107,3 @@ def toggle_pause():
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)
-
-
-
