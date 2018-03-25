@@ -1,6 +1,14 @@
 #!/usr/bin/env python3
 
+import os
+
 import speech_recognition as sr
+from termcolor import cprint
+
+rows, columns = os.popen('stty size', 'r').read().split()
+rows = int(rows)
+columns = int(columns)
+
 
 with open('credentials.json', 'r') as f:
     CREDENTIALS = f.read()
@@ -8,7 +16,7 @@ with open('credentials.json', 'r') as f:
 
 def get_transcript_from_microphone(max_time=5, service='google_cloud'):
     """
-    Transcrives audio gotten from the microphone.
+    Transcribes audio gotten from the microphone.
     :param max_time:
     :param service:
     :return:
@@ -17,13 +25,15 @@ def get_transcript_from_microphone(max_time=5, service='google_cloud'):
     if service == 'google_cloud':
         while True:
             with sr.Microphone() as source:
-                print('Listening...')
+                cprint('\n ' * ((columns // 2) - (len("Listening...") // 2)) + "Listening...", 'magenta',
+                       attrs=['bold'])
                 audio = recognizer.listen(source, phrase_time_limit=max_time)
             try:
                 transcript = recognizer.recognize_google_cloud(audio, credentials_json=CREDENTIALS)
                 return transcript
             except sr.UnknownValueError:
-                print("Could not understand audio, try again")
+                cprint('\n ' * ((columns // 2) - (len("I couldn't understand what you said, try again please.") // 2)) + "I couldn't understand what you said, try again please.", 'magenta',
+                       attrs=['bold'])
             except sr.RequestError as e:
                 print("Could not request results from Google Speech Recognition service; {}".format(e))
 
