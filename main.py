@@ -1,5 +1,6 @@
 import json
 import os
+import sys
 import random
 import time
 import requests
@@ -49,9 +50,10 @@ def subtract_one_life(players, n):
     update_players(players)
 
 
-def read(message):
+def read(message, print_text=True):
     speech = Speech(message, LANGUAGE)
-    cprint('\n'*20 + message.title().center(213-(len(message)//2)), 'red', attrs=['bold'])
+    if print_text:
+        cprint('\n'*20 + message.center(213-(len(message)//2)),'red', attrs=['bold'])
     sox_effects = ("speed", "1.")
     speech.play(sox_effects)
 
@@ -83,10 +85,10 @@ def event_choose_with_whom_to_switch_classes(players):
         who_chooses = random.choice(players)['user']
         if who_chooses['is_alive'] == 'yes':
             break
-    for i in range(len(players)):
-        players[i]['to_update'] = 'yes'
-        if players[i]['user'] == who_chooses:
-            players[i]['can_choose'] = 'yes'
+    for player in players:
+        player['to_update'] = 'yes'
+        if player['user'] == who_chooses:
+            player['can_choose'] = 'yes'
     update_players(players)
     while True:
         time.sleep(0.5)
@@ -127,29 +129,25 @@ def event_choose_who_to_attack(players):
 
 
 def event_steal_a_live(players):
-    while True:
-        who_chooses = random.choice(players)['user']
-        if who_chooses['is_alive'] == 'yes':
-            break
-    for i in range(len(players)):
-        players[i]['to_update'] = 'yes'
-        if players[i]['user'] == who_chooses:
-            players[i]['can_choose'] = 'yes'
+    who_chooses = random.choice([p for p in players if p['is_alive'] == 'yes'])
+    for player in players:
+        player['to_update'] = 'yes'
+        if player['user'] == who_chooses:
+            player['can_choose'] = 'yes'
     update_players(players)
-    while True:
+    the_chosen = None
+    while not the_chosen:
         time.sleep(1)
         r = requests.get(URL + 'has_been_chosen')
-        if r.text:
-            the_chosen = r.text
-            break
-    for i in range(len(players)):
-        players[i]['to_update'] = 'yes'
-        if players[i]['user'] == the_chosen:
-            players[i]['lives'] -= 1
-            read('Player {} has now {} lives.'.format(the_chosen, players[i]['lives']))
-        elif players[i]['user'] == who_chooses:
-            players[i]['lives'] += 1
-            read('Player {} has now {} lives.'.format(who_chooses, players[i]['lives']))
+        the_chosen = r.text
+    for player in players:
+        player['to_update'] = 'yes'
+        if player['user'] == the_chosen:
+            player['lives'] -= 1
+            read('Player {} has now {} lives.'.format(the_chosen, player['lives']))
+        elif player['user'] == who_chooses:
+            player['lives'] += 1
+            read('Player {} has now {} lives.'.format(who_chooses, player['lives']))
     update_players(players)
 
 
@@ -175,9 +173,11 @@ def initialize_players(players):
     for player in players[:N_LOBSTERS[num_players]]:
         player['class'] = 'lobster'
         player['lives'] = INITIAL_LIVES
+        player['is_alive'] = 'yes'
     for player in players[N_LOBSTERS[num_players]:]:
         player['class'] = 'fisherman'
         player['lives'] = INITIAL_LIVES
+        player['is_alive'] = 'yes'
     random.shuffle(players)
     return players
 
@@ -224,28 +224,58 @@ def game_finished(players):
 clean_players()
 
 clear()
-read('Welcome to Lobsters vs Fishermen')
-cprint('='*416, 'red')
-time.sleep(2)
+cprint(r"""
+                                                       _           _         _                              ______ _     _                   
+                                                      | |         | |       | |                            |  ____(_)   | |                  
+                                                      | |     ___ | |__  ___| |_ ___ _ __ ___  __   _____  | |__   _ ___| |__   ___ _ __ ___ 
+                                                      | |    / _ \| '_ \/ __| __/ _ \ '__/ __| \ \ / / __| |  __| | / __| '_ \ / _ \ '__/ __|
+                                                      | |___| (_) | |_) \__ \ ||  __/ |  \__ \  \ V /\__ \ | |    | \__ \ | | |  __/ |  \__ \
+                                                      |______\___/|_.__/|___/\__\___|_|  |___/   \_/ |___/ |_|    |_|___/_| |_|\___|_|  |___/""", 'red')
+read('Welcome to Lobsters vs Fishers', print_text=False)
+time.sleep(.2)
 clear()
-print('Should we start the game?')
+read("I am the MASTER LOBSTER")
+time.sleep(.2)
+clear()
+read("Today, you are fortuned.")
+time.sleep(.2)
+clear()
+read("You will take the roles of valiant FISHERS who had the"
+     "courage to try to fish the deadly LOBSTERS")
+time.sleep(.2)
+clear()
+read("Who will be victorious? Only you can decide the fate of this battle.")
+# cprint('='*416, 'red')
+clear()
+read('Should we start the game?')
 while True:
     transcript = speech2text.get_transcript_from_microphone()
-    if True or speech2text.start_game(transcript):
+    if speech2text.start_game(transcript):
         break
 clear()
 read('Start the game in your phones now')
-while True:
+attempts = 3
+while attempts:
     wait_bar(MAX_CONNECTION_TIME)
     players = read_players()
     if players and len(players) >= MAX_PLAYERS:
         read('Too many players!!')
         read('Resetting users...')
         clean_players()
-    if players and len(players) >= MIN_PLAYERS:
+        clear()
+    elif players and len(players) >= MIN_PLAYERS:
         break
     else:
         read('Too few players!!')
+        if attempts > 1:
+            read('Waiting {} seconds more'.format(MAX_CONNECTION_TIME))
+        clear()
+    attempts -= 1
+if attempts == 0:
+    read('The fate of this battle will remain undecided')
+    read('Until next time!')
+    sys.exit(0)
+
 
 num_players = len(players)
 players = initialize_players(players)
@@ -253,7 +283,9 @@ players = initialize_players(players)
 update_players(players)
 
 clear()
-read('Starting game with {} players'.format(len(players)))
+read('Starting game with {} players'.format(num_players))
+read('Today, {} deadly Lobsters will fight against {} valiant Fishers'.format(N_LOBSTERS[num_players],
+                                                                                num_players-N_LOBSTERS[num_players]))
 time.sleep(2)
 
 while not game_finished(players):
@@ -267,28 +299,28 @@ while not game_finished(players):
     current_event = random.choice(EVENTS)
     read(current_event['message'])
     current_event['method'](players)
-    time.sleep(2)
     clear()
     read("Now you can discuss for {} seconds".format(DISCUSS_TIME))
     wait_bar(DISCUSS_TIME)
-    read("It's fishing time! Which player should be killed?")
-    colors = {
-        0: 'blue',
-        1: 'cyan',
-        2: 'green',
-        3: 'yellow',
-        4: 'red',
-        5: 'magenta',
-        6: 'blue',
-        7: 'cyan',
-        8: 'green',
-        9: 'yellow',
-    }
-    for i, p in enumerate(players):
-        if p['lives'] > 0:
-            cprint(('{}: {}'.format(i+1, p['user'])), color=colors[i])
     confirmed = False
     while not confirmed:
+        clear()
+        read("It's fishing time! Which player should be killed?")
+        colors = {
+            0: 'blue',
+            1: 'cyan',
+            2: 'green',
+            3: 'yellow',
+            4: 'red',
+            5: 'magenta',
+            6: 'blue',
+            7: 'cyan',
+            8: 'green',
+            9: 'yellow'
+        }
+        for i, p in enumerate(players):
+            if p['lives'] > 0:
+                cprint(('{}: {}'.format(i + 1, p['user'])), color=colors[i])
         transcript = speech2text.get_transcript_from_microphone()
         if not transcript:
             continue
@@ -300,6 +332,8 @@ while not game_finished(players):
         read('Do you want to attack player number {}?'.format(target+1))
         transcript = speech2text.get_transcript_from_microphone()
         confirmed = speech2text.confirmation(transcript)
+        if not confirmed:
+            read('Ok, cancelling...'.format(target+1))
     subtract_one_life(players, target)
     if players[target]['lives'] == 0:
         read('Player number {} was a...'.format(target+1))
@@ -308,4 +342,5 @@ while not game_finished(players):
     else:
         read('Player number {} has {} lives left'.format(target + 1, players[target]['lives']))
 
-print(MESSAGES[game_finished(players)])
+read(MESSAGES[game_finished(players)])
+read('Thank you for playing!')
