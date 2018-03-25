@@ -1,6 +1,7 @@
 import json
 import os
 import random
+import copy
 from flask import Flask, session, redirect, url_for, escape, request
 app = Flask(__name__)
 
@@ -88,7 +89,7 @@ def my_choice_is():
 @app.route('/has_been_chosen', methods=['GET'])
 def has_been_chosen():
     global chosen_user
-    to_return = chosen_user
+    to_return = copy.copy(chosen_user)
     chosen_user = ''
     return to_return
 
