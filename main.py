@@ -1,5 +1,4 @@
 import json
-import os
 import sys
 import random
 import time
@@ -354,7 +353,7 @@ while not game_finished(players):
         read('Player number {} has {} lives left.'.format(target + 1, players[target]['lives']))
 
 read('The game has ended!')
-time.sleep(0.3)
+time.sleep(0.5)
 read(MESSAGES[game_finished(players)])
 read('Thank you for playing!')
 read('Until next time!')
