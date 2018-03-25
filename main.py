@@ -34,21 +34,24 @@ INITIAL_LIVES = 3
 
 def check_if_dead(players, user):
     for p in players:
-        if p['user'] == user:
-            if p['lives'] <= 0
+        if p['user'] == user and p['is_alive'] == 'yes':
+            if p['lives'] <= 0:
                 p['lives'] = 0
                 p['is_alive'] = 'no'
+                read('Player {} died!'.format(user))
     update_players(players)
 
 
 def subtract_one_life(players, n):
     players[n]['lives'] -= 1
+    read('Player number {} loses one life'.format(n+1))
+    check_if_dead(players, players[n]['user'])
     update_players(players)
 
 
 def read(message):
     speech = Speech(message, LANGUAGE)
-    cprint('\n'*20 + message.title().center(213-(len(message)//2)),'red', attrs=['bold'])
+    cprint('\n'*20 + message.title().center(213-(len(message)//2)), 'red', attrs=['bold'])
     sox_effects = ("speed", "1.")
     speech.play(sox_effects)
 
@@ -60,19 +63,19 @@ def event_increase_all_lives(players):
             p['to_update'] = 'yes'
     update_players(players)
 
+
 def event_two_lives_lost(players):
     while True:
         doomed_index = random.randint(1, len(players)-1)
         if players[doomed_index]['is_alive'] == 'yes':
             break
     players[doomed_index]['lives'] = max(0, players[doomed_index]['lives']-2)
+    read('Player {} has now {} lives.'.format(players[doomed_index]['user'],
+                                              players[doomed_index]['lives']))
     check_if_dead(players, players[doomed_index]['user'])
     for p in players:
         p['to_update'] = 'yes'
     update_players(players)
-    read('Player {} has now {} lives.'.format(players[doomed_index]['user'],
-                                              players[doomed_index]['lives']))
-
 
 
 def event_choose_with_whom_to_switch_classes(players):
@@ -150,11 +153,17 @@ def event_steal_a_live(players):
     update_players(players)
 
 
-EVENTS = [{'method': event_steal_a_live, 'message': "It's windy! Someone gets to steal a life"},
-          {'method': event_increase_all_lives, 'message': "It's raining. Everybody +1 live!"},
-          {'method': event_two_lives_lost, 'message': "A lightning bolt struck!"},
-          {'method': event_choose_who_to_attack, 'message': "One player chooses a second one, the latter looses one life."},
-          {'method': event_choose_with_whom_to_switch_classes, 'message': "Two players will switch classes"}]
+EVENTS = [{'method': event_steal_a_live,
+           'message': "It's windy! Someone gets to steal a life"},
+          {'method': event_increase_all_lives,
+           'message': "It's raining. Everybody +1 live!"},
+          {'method': event_two_lives_lost,
+           'message': "A lightning bolt struck!"},
+          {'method': event_choose_who_to_attack,
+           'message': "One player chooses a second one, the latter looses one life."},
+          {'method': event_choose_with_whom_to_switch_classes,
+           'message': "Two players will switch classes"}]
+
 
 def clear():
     os.system('clear')
@@ -216,7 +225,7 @@ clean_players()
 
 clear()
 read('Welcome to Lobsters vs Fishermen')
-cprint('='*416,'red')
+cprint('='*416, 'red')
 time.sleep(2)
 clear()
 print('Should we start the game?')
@@ -292,9 +301,7 @@ while not game_finished(players):
         transcript = speech2text.get_transcript_from_microphone()
         confirmed = speech2text.confirmation(transcript)
     subtract_one_life(players, target)
-    read('Player number {} loses one life'.format(target+1))
     if players[target]['lives'] == 0:
-        read('Player number {} died!'.format(target+1))
         read('Player number {} was a...'.format(target+1))
         time.sleep(2)
         read(players[target]['class'])
