@@ -66,12 +66,13 @@ def event_two_lives_lost(players):
         if players[doomed_index]['is_alive'] == 'yes':
             break
     players[doomed_index]['lives'] = max(0, players[doomed_index]['lives']-2)
+    check_if_dead(players, players[doomed_index]['user'])
     for p in players:
         p['to_update'] = 'yes'
     update_players(players)
     read('Player {} has now {} lives.'.format(players[doomed_index]['user'],
                                               players[doomed_index]['lives']))
-    check_if_dead(players, players[doomed_index]['user'])
+
 
 
 def event_choose_with_whom_to_switch_classes(players):
@@ -118,6 +119,7 @@ def event_choose_who_to_attack(players):
         if players[i]['user'] == the_chosen:
             players[i]['lives'] -= 1
             read('Player {} has now {} lives.'.format(the_chosen, players[i]['lives']))
+            check_if_dead(players, the_chosen)
     update_players(players)
 
 
