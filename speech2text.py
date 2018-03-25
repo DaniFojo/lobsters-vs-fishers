@@ -39,13 +39,14 @@ def target_player(transcript, num_players):
     :return:
     """
     target = None
-    players = {str(i) for i in range(1, num_players+1)}
+    numbers = {str(i) for i in range(1, num_players+1)}
     for word in transcript.split():
-        if word in players:
+        if word in numbers:
             if not target:
                 target = int(word)
             else:
                 print('Could not get player from speech.')
+    return target
 
 
 def start_game(transcript):
@@ -55,8 +56,21 @@ def start_game(transcript):
     :return:
     """
     transcript = transcript
-    print(transcript)
     keywords = {'start', 'begin', 'commence', 'go', 'start.', 'begin.', 'commence.', 'go.', 'yes', 'yes.'}
+    for word in transcript.split():
+        if word.lower() in keywords:
+            return True
+    return False
+
+
+def confirmation(transcript):
+    """
+    Given a transcripts returns if the game should start.
+    :param transcript:
+    :return:
+    """
+    transcript = transcript
+    keywords = {'ok', 'okay', 'yes', 'go', 'ok.', 'okay.', 'yes.'}
     for word in transcript.split():
         if word.lower() in keywords:
             return True
