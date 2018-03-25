@@ -25,14 +25,14 @@ def get_transcript_from_microphone(max_time=5, service='google_cloud'):
     if service == 'google_cloud':
         while True:
             with sr.Microphone() as source:
-                cprint('\n ' * ((columns // 2) - (len("Listening...") // 2)) + "Listening...", 'magenta',
+                cprint('\n' + ' ' * ((columns // 2) - (len("Listening...") // 2)) + "Listening...", 'magenta',
                        attrs=['bold'])
                 audio = recognizer.listen(source, phrase_time_limit=max_time)
             try:
                 transcript = recognizer.recognize_google_cloud(audio, credentials_json=CREDENTIALS)
                 return transcript
             except sr.UnknownValueError:
-                cprint('\n ' * ((columns // 2) - (len("I couldn't understand what you said, try again please.") // 2)) + "I couldn't understand what you said, try again please.", 'magenta',
+                cprint('\n' + ' ' * ((columns // 2) - (len("I couldn't understand what you said, try again please.") // 2)) + "I couldn't understand what you said, try again please.", 'magenta',
                        attrs=['bold'])
             except sr.RequestError as e:
                 print("Could not request results from Google Speech Recognition service; {}".format(e))

@@ -15,8 +15,8 @@ rows, columns = os.popen('stty size', 'r').read().split()
 rows = int(rows)
 columns = int(columns)
 URL = 'http://ec2-54-201-70-206.us-west-2.compute.amazonaws.com:5000/'
-MAX_CONNECTION_TIME = 6
-DISCUSS_TIME = 6
+MAX_CONNECTION_TIME = 60
+DISCUSS_TIME = 60
 JSON_FILE = 'players.json'
 MESSAGES = {
     'wl': 'LOBSTERS WIN',
@@ -207,8 +207,8 @@ def clean_players():
 
 
 def wait_bar(t):
-    for _ in trange(t*10):
-        time.sleep(.1)
+    for _ in trange(t):
+        time.sleep(1.)
 
 
 def game_finished(players):
@@ -276,7 +276,6 @@ while attempts:
         read('Too few players!!')
         if attempts > 1:
             read('Waiting {} seconds more'.format(MAX_CONNECTION_TIME))
-        clear()
     attempts -= 1
 if attempts == 0:
     read('The fate of this battle will remain undecided.')
