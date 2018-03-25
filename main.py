@@ -1,12 +1,14 @@
-import time
 import json
 import os
-import requests
 import random
+import time
+import requests
+from termcolor import cprint
 from tqdm import trange
 import speech2text
 from google_speech import Speech
 
+import speech2text
 
 URL = 'http://ec2-54-201-70-206.us-west-2.compute.amazonaws.com:5000/'
 MAX_CONNECTION_TIME = 6
@@ -47,7 +49,7 @@ def subtract_one_life(players, n):
 
 def read(message):
     speech = Speech(message, LANGUAGE)
-    print(message)
+    cprint('\n'*20 + message.title().center(213-(len(message)//2)),'red', attrs=['bold'])
     sox_effects = ("speed", "1.")
     speech.play(sox_effects)
 
@@ -59,7 +61,6 @@ def event_increase_all_lives(players):
                 p['lives'] += 1
                 p['to_update'] = 'yes'
     update_players(players)
-
 
 def event_two_lives_lost(players):
     while True:
@@ -155,7 +156,6 @@ EVENTS = [{'method': event_steal_a_live, 'message': "It's windy! Someone gets to
           {'method': event_choose_who_to_attack, 'message': "One player chooses a second one, the latter looses one life."},
           {'method': event_choose_with_whom_to_switch_classes, 'message': "Two players will switch classes"}]
 
-
 def clear():
     os.system('clear')
 
@@ -216,7 +216,7 @@ clean_players()
 
 clear()
 read('Welcome to Lobsters vs Fishermen')
-print('='*40)
+cprint('='*416,'red')
 time.sleep(2)
 clear()
 print('Should we start the game?')
@@ -251,6 +251,7 @@ while not game_finished(players):
     clear()
     read('A new day starts')
     time.sleep(2)
+    clear()
     read('You can now discuss for {} seconds'.format(DISCUSS_TIME))
     wait_bar(DISCUSS_TIME)
     clear()
@@ -262,9 +263,21 @@ while not game_finished(players):
     read("Now you can discuss for {} seconds".format(DISCUSS_TIME))
     wait_bar(DISCUSS_TIME)
     read("It's fishing time! Which player should be killed?")
+    colors = {
+        0: 'blue',
+        1: 'cyan',
+        2: 'green',
+        3: 'yellow',
+        4: 'red',
+        5: 'magenta',
+        6: 'blue',
+        7: 'cyan',
+        8: 'green',
+        9: 'yellow',
+    }
     for i, p in enumerate(players):
         if p['lives'] > 0:
-            print('{}: {}'.format(i+1, p['user']))
+            cprint(('{}: {}'.format(i+1, p['user'])), color=colors[i])
     confirmed = False
     while not confirmed:
         transcript = speech2text.get_transcript_from_microphone()
