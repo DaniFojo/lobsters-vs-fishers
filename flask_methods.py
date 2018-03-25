@@ -1,6 +1,7 @@
 import json
 import os
 import random
+import copy
 from flask import Flask, session, redirect, url_for, escape, request
 app = Flask(__name__)
 
@@ -31,6 +32,7 @@ def new_player():
     _new_player['class'] = ''
     _new_player['can_choose'] = NO
     _new_player['to_update'] = NO
+    _new_player['is_alive'] = YES
     _new_player['user'] = request.form['user']
     global players
     players.append(_new_player)
@@ -88,7 +90,7 @@ def my_choice_is():
 @app.route('/has_been_chosen', methods=['GET'])
 def has_been_chosen():
     global chosen_user
-    to_return = chosen_user
+    to_return = copy.copy(chosen_user)
     chosen_user = ''
     return to_return
 
@@ -98,7 +100,7 @@ def is_paused():
     return pause
 
 
-@app.route('/toggle_pause', methods=['PUSH'])
+@app.route('/toggle_pause', methods=['POST'])
 def toggle_pause():
     global pause
     pause = NO if pause == YES else YES

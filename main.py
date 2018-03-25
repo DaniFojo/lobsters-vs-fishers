@@ -4,9 +4,9 @@ import random
 import time
 import requests
 from termcolor import cprint
-
-from google_speech import Speech
 from tqdm import trange
+import speech2text
+from google_speech import Speech
 
 import speech2text
 
@@ -33,6 +33,15 @@ N_LOBSTERS = {
 INITIAL_LIVES = 3
 
 
+def check_if_dead(players, user):
+    for p in players:
+        if p['user'] == user:
+            if p['lives'] <= 0
+                p['lives'] = 0
+                p['is_alive'] = 'no'
+    update_players(players)
+
+
 def subtract_one_life(players, n):
     players[n]['lives'] -= 1
     update_players(players)
@@ -47,53 +56,105 @@ def read(message):
 
 def event_increase_all_lives(players):
     for p in players:
-        if not p['lives'] == 0:
-            p['lives'] += 1
-            p['to_update'] = 'yes'
+        if p['is_alive'] == 'yes':
+            if not p['lives'] == 0:
+                p['lives'] += 1
+                p['to_update'] = 'yes'
     update_players(players)
 
-# def event_player_steal_life(players):
+def event_two_lives_lost(players):
+    while True:
+        doomed_index = random.randint(1, len(players)-1)
+        if players[doomed_index]['is_alive'] == 'yes':
+            break
+    players[doomed_index]['lives'] = max(0, players[doomed_index]['lives']-2)
+    for p in players:
+        p['to_update'] = 'yes'
+    update_players(players)
+    read('Player {} has now {} lives.'.format(players[doomed_index]['user'],
+                                              players[doomed_index]['lives']))
+    check_if_dead(players, players[doomed_index]['user'])
 
 
 def event_choose_with_whom_to_switch_classes(players):
-    who_chooses = random.choice(players)['user']
+    while True:
+        who_chooses = random.choice(players)['user']
+        if who_chooses['is_alive'] == 'yes':
+            break
     for i in range(len(players)):
         players[i]['to_update'] = 'yes'
         if players[i]['user'] == who_chooses:
             players[i]['can_choose'] = 'yes'
     update_players(players)
-    print('Two players will switch classes')
     while True:
-        the_chosen = requests.get(URL + 'has_been_chosen')
-        if the_chosen:
+        time.sleep(0.5)
+        r = requests.get(URL + 'has_been_chosen')
+        if r.text:
+            the_chosen = r.text
             break
     for i in range(len(players)):
         players[i]['to_update'] = 'yes'
         if players[i]['user'] in (who_chooses, the_chosen):
-
             players[i]['class'] = 'fisherman' if players[i]['class'] == 'lobster' else 'lobster'
+    update_players(players)
 
 
 def event_choose_who_to_attack(players):
-    who_chooses = random.choice(players)['user']
+    while True:
+        who_chooses = random.choice(players)['user']
+        if who_chooses['is_alive'] == 'yes':
+            break
     for i in range(len(players)):
         players[i]['to_update'] = 'yes'
         if players[i]['user'] == who_chooses:
             players[i]['can_choose'] = 'yes'
     update_players(players)
-    print('One player chooses a second one, the latter looses one life.')
     while True:
-        the_chosen = requests.get(URL + 'has_been_chosen')
-        if the_chosen:
+        time.sleep(1)
+        r = requests.get(URL + 'has_been_chosen')
+        if r.text:
+            the_chosen = r.text
             break
     for i in range(len(players)):
         players[i]['to_update'] = 'yes'
         if players[i]['user'] == the_chosen:
             players[i]['lives'] -= 1
+            read('Player {} has now {} lives.'.format(the_chosen, players[i]['lives']))
+    update_players(players)
 
 
-EVENTS = [{'method': event_increase_all_lives, 'message': "It's raining. Everybody +1 live!"}]
+def event_steal_a_live(players):
+    while True:
+        who_chooses = random.choice(players)['user']
+        if who_chooses['is_alive'] == 'yes':
+            break
+    for i in range(len(players)):
+        players[i]['to_update'] = 'yes'
+        if players[i]['user'] == who_chooses:
+            players[i]['can_choose'] = 'yes'
+    update_players(players)
+    while True:
+        time.sleep(1)
+        r = requests.get(URL + 'has_been_chosen')
+        if r.text:
+            the_chosen = r.text
+            break
+    for i in range(len(players)):
+        players[i]['to_update'] = 'yes'
+        if players[i]['user'] == the_chosen:
+            players[i]['lives'] -= 1
+            read('Player {} has now {} lives.'.format(the_chosen, players[i]['lives']))
+        elif players[i]['user'] == who_chooses:
+            players[i]['lives'] += 1
+            read('Player {} has now {} lives.'.format(who_chooses, players[i]['lives']))
+    update_players(players)
 
+
+EVENTS = [{'method': event_steal_a_live, 'message': "It's windy! Someone gets to steal a life"},
+          {'method': event_increase_all_lives, 'message': "It's raining. Everybody +1 live!"},
+          {'method': event_two_lives_lost, 'message': "A lightning bolt struck!"},
+          {'method': event_choose_who_to_attack, 'message': "One player chooses a second one, the latter looses one life."},
+          {'method': event_choose_with_whom_to_switch_classes, 'message': "Two players will switch classes"}]
 
 def clear():
     os.system('clear')
@@ -158,7 +219,7 @@ read('Welcome to Lobsters vs Fishermen')
 cprint('='*416,'red')
 time.sleep(2)
 clear()
-read('Should we start the game?')
+print('Should we start the game?')
 while True:
     transcript = speech2text.get_transcript_from_microphone()
     if True or speech2text.start_game(transcript):
