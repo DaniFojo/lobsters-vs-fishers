@@ -1,6 +1,7 @@
 import time
 import json
 import os
+import sys
 import requests
 import random
 
@@ -60,8 +61,10 @@ def event_choose_with_whom_to_switch_classes(players):
             players[i]['can_choose'] = 'yes'
     update_players(players)
     while True:
-        the_chosen = requests.get(URL + 'has_been_chosen')
-        if the_chosen:
+        time.sleep(0.5)
+        r = requests.get(URL + 'has_been_chosen')
+        if r.text:
+            the_chosen = r.text
             break
     for i in range(len(players)):
         players[i]['to_update'] = 'yes'
@@ -78,8 +81,10 @@ def event_choose_who_to_attack(players):
             players[i]['can_choose'] = 'yes'
     update_players(players)
     while True:
-        the_chosen = requests.get(URL + 'has_been_chosen')
-        if the_chosen:
+        time.sleep(1)
+        r = requests.get(URL + 'has_been_chosen')
+        if r.text:
+            the_chosen = r.text
             break
     for i in range(len(players)):
         players[i]['to_update'] = 'yes'
@@ -191,13 +196,16 @@ while not game_finished(players):
     read('You can now discuss for {} seconds'.format(DISCUSS_TIME))
     wait_bar(DISCUSS_TIME)
     clear()
-    current_event = random.choice(EVENTS)
-    read(current_event['message'])
-    current_event['method'](players)
+    # current_event = random.choice(EVENTS)
+    # read(current_event['message'])
+    # current_event['method'](players)
+    read('Two players will switch classes')
+    event_choose_with_whom_to_switch_classes(players)
     time.sleep(2)
     clear()
     read("Now you can discuss for {} seconds".format(DISCUSS_TIME))
     wait_bar(DISCUSS_TIME)
+    sys.exit()
     read("It's fishing time! Which player should be killed?")
     for i, p in enumerate(players):
         if p['lives'] > 0:

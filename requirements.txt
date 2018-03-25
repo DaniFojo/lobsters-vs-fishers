@@ -4,4 +4,4 @@ PyAudio
 SpeechRecognition
 google-api-python-client
 tqdm
-
+google_speech
