@@ -1,4 +1,6 @@
 # Lobsters vs Fishers
+![lobster_vs_fisher](https://i.imgur.com/amTtNle.jpg)
+
 ## Since the beginning of time...
 Since the beginning of time, an epic battle has been going on between Fishers and Lobsters.
 
