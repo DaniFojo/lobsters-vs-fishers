@@ -36,8 +36,6 @@ def event_increase_all_lives(players):
             p['to_update'] = 'yes'
     update_players(players)
 
-def event_player_steal_life(players):
-
 
 def event_choose_with_whom_to_switch_classes(players):
     who_chooses = random.choice(players)['user']
@@ -46,7 +44,6 @@ def event_choose_with_whom_to_switch_classes(players):
         if players[i]['user'] == who_chooses:
             players[i]['can_choose'] = 'yes'
     update_players(players)
-    print('Two players will switch classes')
     while True:
         the_chosen = requests.get(URL + 'has_been_chosen')
         if the_chosen:
@@ -65,7 +62,6 @@ def event_choose_who_to_attack(players):
         if players[i]['user'] == who_chooses:
             players[i]['can_choose'] = 'yes'
     update_players(players)
-    print('One player chooses a second one, the latter looses one life.')
     while True:
         the_chosen = requests.get(URL + 'has_been_chosen')
         if the_chosen:
@@ -76,7 +72,9 @@ def event_choose_who_to_attack(players):
             players[i]['lives'] -= 1
 
 
-EVENTS = [{'method': event_increase_all_lives, 'message': "It's raining. Everybody +1 live!"}]
+EVENTS = [{'method': event_increase_all_lives, 'message': "It's raining. Everybody +1 live!"},
+          {'method': event_choose_who_to_attack, 'message': "One player chooses a second one, the latter looses one life."},
+          {'method': event_choose_with_whom_to_switch_classes, 'message': "Two players will switch classes"}]
 
 
 
@@ -97,8 +95,7 @@ def initialize_players(players):
 
 
 def update_players(players):
-    print(json.dumps(players))
-    r = requests.post(URL + 'update_players', data={'players': json.dumps(players)})
+    r = requests.put(URL + 'update_players', data={'players': json.dumps(players)})
     if not r.status_code == 200:
         raise Exception
 
@@ -144,10 +141,10 @@ print('='*40)
 time.sleep(4)
 clear()
 print('Should we start the game?')
-while True:
-    transcript = speech2text.get_transcript_from_microphone()
-    if True or speech2text.start_game(transcript):
-        break
+# while True:
+#     transcript = speech2text.get_transcript_from_microphone()
+#     if True or speech2text.start_game(transcript):
+#         break
 clear()
 print('Start the game in your phones now')
 while True:
