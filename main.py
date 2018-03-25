@@ -5,7 +5,6 @@ import time
 import requests
 from termcolor import cprint
 from tqdm import trange
-import speech2text
 from google_speech import Speech
 
 import speech2text
@@ -57,9 +56,8 @@ def read(message):
 def event_increase_all_lives(players):
     for p in players:
         if p['is_alive'] == 'yes':
-            if not p['lives'] == 0:
-                p['lives'] += 1
-                p['to_update'] = 'yes'
+            p['lives'] += 1
+            p['to_update'] = 'yes'
     update_players(players)
 
 def event_two_lives_lost(players):
