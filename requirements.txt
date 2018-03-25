@@ -1,7 +1,7 @@
 flask
 requests
 PyAudio
-speech_recognition
+SpeechRecognition
 google-api-python-client
 tqdm
 
