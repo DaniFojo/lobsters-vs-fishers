@@ -9,14 +9,18 @@ from tqdm import trange
 from google_speech import Speech
 
 import speech2text
+import os
 
+rows, columns = os.popen('stty size', 'r').read().split()
+rows = int(rows)
+columns = int(columns)
 URL = 'http://ec2-54-201-70-206.us-west-2.compute.amazonaws.com:5000/'
 MAX_CONNECTION_TIME = 6
 DISCUSS_TIME = 6
 JSON_FILE = 'players.json'
 MESSAGES = {
     'wl': 'LOBSTERS WIN',
-    'wf': 'FISHERMEN WIN',
+    'wf': 'FISHERS WIN',
     'tie': 'GAME TIED'
 }
 LANGUAGE = "en"
@@ -49,7 +53,7 @@ def subtract_one_life(players, n):
 def read(message, print_text=True):
     speech = Speech(message, LANGUAGE)
     if print_text:
-        cprint('\n'*20 + message.center(213-(len(message)//2)),'red', attrs=['bold'])
+        cprint('\n'*(rows//2) + ' '*((columns//2)-(len(message)//2)) + message, 'red', attrs=['bold'])
     sox_effects = ("speed", "1.")
     speech.play(sox_effects)
 
@@ -146,11 +150,16 @@ def event_steal_a_live(players):
     update_players(players)
 
 
-EVENTS = [{'method': event_steal_a_live, 'message': "It's windy! Someone gets to steal a life"},
-          {'method': event_increase_all_lives, 'message': "It's raining. Everybody +1 live!"},
-          {'method': event_two_lives_lost, 'message': "A lightning bolt struck! Someone loses 2 lives!"},
-          {'method': event_choose_who_to_attack, 'message': "One player chooses a second one, who looses one life."},
-          {'method': event_choose_with_whom_to_switch_classes, 'message': "Two players switch classes"}]
+EVENTS = [{'method': event_steal_a_live,
+           'message': "It's windy! Someone gets to steal a life."},
+          {'method': event_increase_all_lives,
+           'message': "It's sunny! Everybody +1 live!"},
+          {'method': event_two_lives_lost,
+           'message': "A lightning bolt struck! Someone loses 2 lives!"},
+          {'method': event_choose_who_to_attack,
+           'message': "It's raining! One player chooses a second one, who looses one life."},
+          {'method': event_choose_with_whom_to_switch_classes,
+           'message': "There is full moon! Two players switch classes."}]
 
 
 def clear():
@@ -214,28 +223,31 @@ def game_finished(players):
 clean_players()
 
 clear()
-cprint(r"""
-                                                       _           _         _                              ______ _     _                   
-                                                      | |         | |       | |                            |  ____(_)   | |                  
-                                                      | |     ___ | |__  ___| |_ ___ _ __ ___  __   _____  | |__   _ ___| |__   ___ _ __ ___ 
-                                                      | |    / _ \| '_ \/ __| __/ _ \ '__/ __| \ \ / / __| |  __| | / __| '_ \ / _ \ '__/ __|
-                                                      | |___| (_) | |_) \__ \ ||  __/ |  \__ \  \ V /\__ \ | |    | \__ \ | | |  __/ |  \__ \
-                                                      |______\___/|_.__/|___/\__\___|_|  |___/   \_/ |___/ |_|    |_|___/_| |_|\___|_|  |___/""", 'red')
-read('Welcome to Lobsters vs Fishers', print_text=False)
+tmp = len("|______\___/|_.__/|___/\__\___|_|  |___/   \_/ |___/ |_|    |_|___/_| |_|\___|_|  |___/")
+cprint(
+' '*(columns//2-tmp//2) + " _           _         _                              ______ _     _                   \n"+
+' '*(columns//2-tmp//2) + "| |         | |       | |                            |  ____(_)   | |                  \n"+
+' '*(columns//2-tmp//2) + "| |     ___ | |__  ___| |_ ___ _ __ ___  __   _____  | |__   _ ___| |__   ___ _ __ ___ \n"+
+' '*(columns//2-tmp//2) + "| |    / _ \| '_ \/ __| __/ _ \ '__/ __| \ \ / / __| |  __| | / __| '_ \ / _ \ '__/ __|\n"+
+' '*(columns//2-tmp//2) + "| |___| (_) | |_) \__ \ ||  __/ |  \__ \  \ V /\__ \ | |    | \__ \ | | |  __/ |  \__ \\\n"+
+' '*(columns//2-tmp//2) + "|______\___/|_.__/|___/\__\___|_|  |___/   \_/ |___/ |_|    |_|___/_| |_|\___|_|  |___/\n", 'red')
+read('Welcome to Lobsters vs Fishers.', print_text=False)
 time.sleep(.2)
 clear()
-read("I am the MASTER LOBSTER")
+read("I am the MASTER LOBSTER.")
+time.sleep(.2)
+clear()
+read("I will be your narrator for this adventure.")
 time.sleep(.2)
 clear()
 read("Today, you are fortuned.")
 time.sleep(.2)
 clear()
-read("You will take the roles of valiant FISHERS who had the"
-     "courage to try to fish the deadly LOBSTERS")
+read("You will take the roles of valiant FISHERS who had the "
+     "courage to try to fish the deadly LOBSTERS.")
 time.sleep(.2)
 clear()
 read("Who will be victorious? Only you can decide the fate of this battle.")
-# cprint('='*416, 'red')
 clear()
 read('Should we start the game?')
 while True:
@@ -243,7 +255,7 @@ while True:
     if speech2text.start_game(transcript):
         break
 clear()
-read('Start the game in your phones now')
+read('Start the game in your phones now.')
 attempts = 3
 while attempts:
     wait_bar(MAX_CONNECTION_TIME)
@@ -262,7 +274,7 @@ while attempts:
         clear()
     attempts -= 1
 if attempts == 0:
-    read('The fate of this battle will remain undecided')
+    read('The fate of this battle will remain undecided.')
     read('Until next time!')
     sys.exit(0)
 
@@ -273,24 +285,27 @@ players = initialize_players(players)
 update_players(players)
 
 clear()
-read('Starting game with {} players'.format(num_players))
-read('Today, {} deadly Lobsters will fight against {} valiant Fishers'.format(N_LOBSTERS[num_players],
+read('Starting game with {} players.'.format(num_players))
+clear()
+read('Today, {} deadly Lobsters will fight against {} valiant Fishers.'.format(N_LOBSTERS[num_players],
                                                                                 num_players-N_LOBSTERS[num_players]))
+clear()
+read('Look at your devices to see your role.')
 time.sleep(2)
 
 while not game_finished(players):
     clear()
-    read('A new day starts')
+    read('A new day starts.')
     time.sleep(2)
     clear()
-    read('You can now discuss for {} seconds'.format(DISCUSS_TIME))
+    read('You can now discuss for {} seconds.'.format(DISCUSS_TIME))
     wait_bar(DISCUSS_TIME)
     clear()
     current_event = random.choice(EVENTS)
     read(current_event['message'])
     current_event['method'](players)
     clear()
-    read("Now you can discuss for {} seconds".format(DISCUSS_TIME))
+    read("Now you can discuss for {} seconds.".format(DISCUSS_TIME))
     wait_bar(DISCUSS_TIME)
     confirmed = False
     while not confirmed:
@@ -325,14 +340,16 @@ while not game_finished(players):
         if not confirmed:
             read('Ok, cancelling...'.format(target+1))
     subtract_one_life(players, target)
-    read('Player number {} loses one life'.format(target+1))
+    read('Player number {} loses one life.'.format(target+1))
     if players[target]['lives'] == 0:
         read('Player number {} died!'.format(target+1))
         read('Player number {} was a...'.format(target+1))
         time.sleep(2)
         read(players[target]['class'])
     else:
-        read('Player number {} has {} lives left'.format(target + 1, players[target]['lives']))
+        read('Player number {} has {} lives left.'.format(target + 1, players[target]['lives']))
 
+read('The game has ended!')
+time.sleep(0.3)
 read(MESSAGES[game_finished(players)])
 read('Thank you for playing!')
