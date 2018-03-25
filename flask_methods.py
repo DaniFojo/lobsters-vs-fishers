@@ -32,6 +32,7 @@ def new_player():
     _new_player['class'] = ''
     _new_player['can_choose'] = NO
     _new_player['to_update'] = NO
+    _new_player['is_alive'] = YES
     _new_player['user'] = request.form['user']
     global players
     players.append(_new_player)
@@ -99,7 +100,7 @@ def is_paused():
     return pause
 
 
-@app.route('/toggle_pause', methods=['PUSH'])
+@app.route('/toggle_pause', methods=['POST'])
 def toggle_pause():
     global pause
     pause = NO if pause == YES else YES
