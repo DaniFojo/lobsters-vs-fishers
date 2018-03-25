@@ -85,8 +85,8 @@ def my_choice_is():
 
 @app.route('/has_been_chosen', methods=['GET'])
 def has_been_chosen():
-    to_return = chosen_user
     global chosen_user
+    to_return = chosen_user
     chosen_user = ''
     return to_return
 

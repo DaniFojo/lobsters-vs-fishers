@@ -33,7 +33,45 @@ def event_increase_all_lives(players):
     for p in players:
         if not p['lives'] == 0:
             p['lives'] += 1
+            p['to_update'] = 'yes'
     update_players(players)
+
+
+def event_choose_with_whom_to_switch_classes(players):
+    who_chooses = random.choice(players)['user']
+    for i in range(len(players)):
+        players[i]['to_update'] = 'yes'
+        if players[i]['user'] == who_chooses:
+            players[i]['can_choose'] = 'yes'
+    update_players(players)
+    print('Two players will switch classes')
+    while True:
+        the_chosen = requests.get(URL + 'has_been_chosen')
+        if the_chosen:
+            break
+    for i in range(len(players)):
+        players[i]['to_update'] = 'yes'
+        if players[i]['user'] in (who_chooses, the_chosen):
+
+            players[i]['class'] = 'fisherman' if players[i]['class'] == 'lobster' else 'lobster'
+
+
+def event_choose_who_to_attack(players):
+    who_chooses = random.choice(players)['user']
+    for i in range(len(players)):
+        players[i]['to_update'] = 'yes'
+        if players[i]['user'] == who_chooses:
+            players[i]['can_choose'] = 'yes'
+    update_players(players)
+    print('One player chooses a second one, the latter looses one life.')
+    while True:
+        the_chosen = requests.get(URL + 'has_been_chosen')
+        if the_chosen:
+            break
+    for i in range(len(players)):
+        players[i]['to_update'] = 'yes'
+        if players[i]['user'] == the_chosen:
+            players[i]['lives'] -= 1
 
 
 EVENTS = [{'method': event_increase_all_lives, 'message': "It's raining. Everybody +1 live!"}]
